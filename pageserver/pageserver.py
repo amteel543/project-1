@@ -37,6 +37,7 @@ def listen(portnum):
     # Internet, streaming socket
     serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     # Bind to port and make accessible from anywhere that has our IP address
+    print(portnum)
     serversocket.bind(('', portnum))
     serversocket.listen(1)    # A real server would have multiple listeners
     return serversocket
@@ -91,8 +92,11 @@ def respond(sock):
 
     parts = request.split()
     if len(parts) > 1 and parts[0] == "GET":
+
         transmit(STATUS_OK, sock)
         transmit(CAT, sock)
+        print("Hello!")
+		
     else:
         log.info("Unhandled request: {}".format(request))
         transmit(STATUS_NOT_IMPLEMENTED, sock)
