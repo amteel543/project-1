@@ -13,6 +13,8 @@
   program is run).
 """
 
+#from importlib.abc import Traversable
+#from pydoc import doc
 import config    # Configure from .ini files and command line
 import logging   # Better than print statements
 logging.basicConfig(format='%(levelname)s:%(message)s',
@@ -22,6 +24,9 @@ log = logging.getLogger(__name__)
 
 import socket    # Basic TCP/IP communication on the internet
 import _thread   # Response computation runs concurrently with main program
+
+
+import os
 
 
 def listen(portnum):
@@ -93,10 +98,36 @@ def respond(sock):
     parts = request.split()
     if len(parts) > 1 and parts[0] == "GET":
 
-        transmit(STATUS_OK, sock)
-        transmit(CAT, sock)
-        print("Hello!")
-		
+        ops = get_options()
+
+        doc_root = ops.DOCROOT
+
+        x = parts[1]
+
+        if ('..' in parts[1]) or ('~' in parts[1]):
+
+            transmit(STATUS_FORBIDDEN, sock)
+
+            transmit("403 Forbidden", sock)
+            
+        else:
+
+            if os.path.exists(f"{doc_root}{x}"): 
+
+                y = open(f"{doc_root}{x}", 'r')
+
+                z = y.read()
+
+                transmit(STATUS_OK, sock)
+
+                transmit(z, sock)
+
+            else:
+
+                transmit(STATUS_NOT_FOUND, sock)
+
+                transmit("404 Not Found", sock)
+            	
     else:
         log.info("Unhandled request: {}".format(request))
         transmit(STATUS_NOT_IMPLEMENTED, sock)
